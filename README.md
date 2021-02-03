@@ -10,3 +10,5 @@ Executed in Docker containers running Ubuntu 16.04 integrated with GNS3.
 * <http://www.ospf.org> - Original source code by John T. Moy, and respective patches
 
 * <https://github.com/pfa/ospfd-diffs> - Most of required changes to run base code in Ubuntu 16.04
+
+* <https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/releases/tag/Base_code_ubuntu_16> - Base code patched to run in Ubuntu 16, without Python code

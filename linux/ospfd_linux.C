@@ -17,6 +17,7 @@
  *   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <Python.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -89,6 +90,81 @@ void reconfig(int)
 int main(int, char * [])
 
 {
+    // BEGINNING OF PYTHON-RELATED CODE
+
+    // Initialize the Python interpreter
+    Py_Initialize();
+    // Important: Replace with absolute path to Python files folder
+    PyRun_SimpleString("import sys\nfrom time import time,ctime; sys.path.insert(0, '/ospf/python')\nprint('Python started at',ctime(time()))\n");
+
+    // Run Python function returning a string, with no arguments
+    PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
+    pName = PyUnicode_FromString((char*)"example");
+    pModule = PyImport_Import(pName);
+    pFunc = PyObject_GetAttrString(pModule, (char*)"no_arguments");
+    pArgs = PyTuple_Pack(0, NULL);
+    pValue = PyObject_CallObject(pFunc, pArgs);
+    char* result = {};
+    result = _PyUnicode_AsString(pValue);
+    printf("%s", result);
+
+    // Run Python function returning a string, with one argument
+    pFunc = PyObject_GetAttrString(PyImport_Import(PyUnicode_FromString((char*)"example")), (char*)"string_example");
+    pArgs = PyTuple_Pack(1, PyUnicode_FromString((char*)"This experiment was successful"));
+    result = _PyUnicode_AsString(PyObject_CallObject(pFunc, pArgs));
+    printf("%s", result);
+
+    // Run Python function returning an int
+    pFunc = PyObject_GetAttrString(PyImport_Import(PyUnicode_FromString((char*)"example")), (char*)"int_example");
+    pArgs = PyTuple_Pack(1, PyLong_FromLong(10));
+    long long_result = 0;
+    long_result = PyLong_AsLong(PyObject_CallObject(pFunc, pArgs));
+    printf("%s%d%s", "The received number was: ", long_result, "\n");
+
+    // Run Python function returning a boolean
+    pFunc = PyObject_GetAttrString(PyImport_Import(PyUnicode_FromString((char*)"example")), (char*)"bool_example");
+    pArgs = PyTuple_Pack(1, Py_False);
+    bool bool_result = 0;
+    bool_result = PyBool_Check(PyObject_CallObject(pFunc, pArgs));
+    printf("%s%d%s", "The received boolean was: ", bool_result, "\n");
+
+    // Run Python function returning a bytes object
+    pFunc = PyObject_GetAttrString(PyImport_Import(PyUnicode_FromString((char*)"example")), (char*)"bytes_example");
+    pArgs = PyTuple_Pack(1, PyBytes_FromString("abcd\x61\x62\x63\x64"));
+    result = PyBytes_AsString(PyObject_CallObject(pFunc, pArgs));
+    printf("%s%s%s", "The received bytes were: ", result, "\n");
+
+    // Run Python function returning a list
+    pFunc = PyObject_GetAttrString(PyImport_Import(PyUnicode_FromString((char*)"example")), (char*)"list_example");
+    PyObject *list = PyList_New(0);
+    PyList_Append(list, PyUnicode_FromString((char*)"a"));
+    PyList_Append(list, PyUnicode_FromString((char*)"b"));
+    pArgs = PyTuple_Pack(1, list);
+    PyObject *list_result = PyObject_CallObject(pFunc, pArgs);
+    printf("%s%d%s", "The length of the received list is: ", PyList_Size(list_result), "\n");
+    const char *element_1 = PyUnicode_AS_DATA(PyList_GetItem(list_result, 0));
+    const char *element_2 = PyUnicode_AS_DATA(PyList_GetItem(list_result, 1));
+    const char *element_3 = PyUnicode_AS_DATA(PyList_GetItem(list_result, 2));
+    printf("%s%s%s%s%s", "The elements of the received list are: ", element_1, element_2, element_3, "\n");
+
+    // Create a custom data object, pack it to bytes, and unpack the bytes back to the original data object
+    PyObject *module = PyImport_ImportModule((char*)"data_object");
+    PyObject *custom_class = PyObject_GetAttrString(module, (char*)"ExtensionAbr");
+    PyObject *instance = PyObject_CallObject(custom_class, PyTuple_Pack(0, NULL));
+    PyObject *metric = PyLong_FromLong(10);
+    PyObject *neighbor_router_id = PyUnicode_FromString((char*)"1.1.1.1");
+    PyObject_CallMethodObjArgs(instance, PyUnicode_FromString((char*)"add_abr_info"), metric, neighbor_router_id, NULL);
+    PyObject *printed_object = PyObject_CallMethodObjArgs(instance, PyUnicode_FromString((char*)"__str__"), NULL);
+    printf("%s%s%s", "The printed custom object is: ", _PyUnicode_AsString(printed_object), "\n");
+    PyObject *object_bytes = PyObject_CallMethodObjArgs(instance, PyUnicode_FromString((char*)"pack_lsa_body"), NULL);
+    PyObject *restored_instance = PyObject_CallMethodObjArgs(instance, PyUnicode_FromString((char*)"unpack_lsa_body"), object_bytes, NULL);
+    printed_object = PyObject_CallMethodObjArgs(restored_instance, PyUnicode_FromString((char*)"__str__"), NULL);
+    printf("%s%s%s", "The restored printed custom object is: ", _PyUnicode_AsString(printed_object), "\n");
+
+    Py_Finalize();
+
+    // END OF PYTHON-RELATED CODE
+
     int n_fd;
     itimerval itim;
     fd_set fdset;

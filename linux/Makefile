@@ -7,6 +7,12 @@ CGI_DIR = /usr/lib/cgi-bin
 CPPFLAGS = -I. -I../src -I/usr/local/include "-DUSE_INTERP_ERRORLINE" # ErrorLine is deprecated, requires flag
 CXXFLAGS = -O -g -Wall -Woverloaded-virtual -Wcast-qual -Wuninitialized
 CFLAGS = -O -g -Wall -Woverloaded-virtual -Wcast-qual -Wuninitialized
+# Python recommended compilation flags, as obtained by "python3-config --cflags"
+PCOMPILEFLAGS = -I/usr/include/python3.5m -I/usr/include/python3.5m  -Wno-unused-result -Wsign-compare -g \
+-fstack-protector-strong -Wformat -Werror=format-security  -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes
+# Python recommended linking flags, as obtained by "python3-config --ldflags"
+PLINKFLAGS =  -L/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu -L/usr/lib -lpython3.5m -lpthread -ldl  -lutil -lm  \
+-Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
 
 OBJS	= asbrlsa.o \
 	  asexlsa.o \
@@ -56,8 +62,8 @@ install: ospfd ospfd_mon ospfd_browser
 	cp ospfd.tcl ${INSTALL_DIR}
 
 ospfd:	ospfd_linux.C linux.o system.o tcppkt.o ${OBJS}
-	g++ $(CXXFLAGS) $(CPPFLAGS) ospfd_linux.C linux.o system.o \
-	 tcppkt.o ${OBJS} \
+	g++ $(CXXFLAGS) $(CPPFLAGS) $(PCOMPILEFLAGS) ospfd_linux.C linux.o system.o \
+	 tcppkt.o ${OBJS} $(PLINKFLAGS) \
 	-DINSTALL_DIR=\"${INSTALL_DIR}\" -ltcl -lm -ldl -o ospfd
 
 ospfd_mon: tcppkt.o lsa_prn.o
@@ -71,11 +77,11 @@ clean:
 # Stuff to automatically maintain dependency files
 
 .c.o:
-	gcc -MD $(CFLAGS) $(CPPFLAGS) -c $<
+	gcc -MD $(CFLAGS) $(CPPFLAGS) $(PCOMPILEFLAGS) $(PLINKFLAGS) -c $<
 	@mkdir -p .depfiles ; mv $*.d .depfiles
 
 .C.o:
-	g++ -MD $(CXXFLAGS) $(CPPFLAGS) -c $<
+	g++ -MD $(CXXFLAGS) $(CPPFLAGS) $(PCOMPILEFLAGS) $(PLINKFLAGS) -c $<
 	@mkdir -p .depfiles ; mv $*.d .depfiles
 
 -include $(OBJS:%.o=.depfiles/%.d)

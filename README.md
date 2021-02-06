@@ -7,9 +7,11 @@ Executed in Docker containers running Ubuntu 16.04 integrated with GNS3.
 
 ## Installing and running
 
+A [Dockerfile](https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/blob/main/Dockerfile) is included in this repository, with the required packages to run the program. 
+
 Before running the program, a configuration file `ospfd.conf` must be created or placed inside the /etc directory of the machine or Docker container running the program. A sample [configuration file](https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/blob/main/ospfd.conf) is included in this repository.
 
-It is necessary to provide the absolute path to the /python directory of the source code in the line 98 of the [ospfd_linux.C](https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/blob/cb2ebdbeb76b8e787ac0cff179b629237d9ff22d/linux/ospfd_linux.C#L98) file. Currently, it is assumed that the path is /ospf/python.
+It is necessary to provide the absolute path to the /python directory of the source code in the line 98 of the [ospfd_linux.C](https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/blob/ac0582e3da201882b8fdfb3ce622a1275f095330/linux/ospfd_linux.C#L98) file. Currently, it is assumed that the path is /ospf/python.
 
 After copying the content of this repository to the machine, it is necessary to open a terminal and go to the /linux directory of the source code. The program is compiled by running `make install`, and then executed by running `ospfd`. The command `ospfd` can be executed anywhere, and must be run as `root`.
 
@@ -17,7 +19,7 @@ After copying the content of this repository to the machine, it is necessary to 
 
 ## Python code
 
-Two Python modules have been created along with C++ code interacting with them, producing some output. The Python code is stored in the /python directory of this repository, while the C++ code interacting with Python is stored in the file [ospfd_linux.C](https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/blob/cb2ebdbeb76b8e787ac0cff179b629237d9ff22d/linux/ospfd_linux.C#L93). The [Makefile](https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/blob/main/linux/Makefile) was also updated with Python-specific flags.
+Two Python modules have been created along with C++ code interacting with them, producing some output. The Python code is stored in the /python directory of this repository, while the C++ code interacting with Python is stored in the file [ospfd_linux.C](https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/blob/ac0582e3da201882b8fdfb3ce622a1275f095330/linux/ospfd_linux.C#L93). The [Makefile](https://github.com/migueldgoncalves/ospf_cplusplus_python_integration/blob/main/linux/Makefile) was also updated with Python-specific flags.
 
 The experiments involve calling Python functions with different types of arguments and returns, and manipulating Python
 objects of different types.
